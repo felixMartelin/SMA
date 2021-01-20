@@ -7,20 +7,39 @@ public class Agent extends Entite{
     private int taille;
     private Queue<String> Memoire;
     private int i;
+    private Objet objet;
+    private boolean haveObject;
     private double probaDepot;
     private double probaPrise;
 
     public Agent(int deplacement, int taille){
        this.Memoire = new LinkedList<>();
        this.i = deplacement;
+       this.haveObject = false;
     }
 
     public String getType(){
         return "X";
     }
 
+    public boolean getHaveObject() {
+        return haveObject;
+    }
+
+    public void setHaveObject(boolean haveObject) {
+        this.haveObject = haveObject;
+    }
+
     public int getTaille(){
         return this.taille;
+    }
+
+    public Objet getObjet() {
+        return this.objet;
+    }
+
+    public void setObjet(Objet objet) {
+        this.objet = objet;
     }
 
     public void setTaille(int taille) {
@@ -69,11 +88,11 @@ public class Agent extends Entite{
         this.probaPrise = probaPrise;
     }
 
-    public double calculProbaDepot(int f, float k){
+    public double calculProbaDepot(int f, double k){
         return Math.pow((f/(k+f)),2);
     }
 
-    public double calculProbaPrise(int f, float k){
+    public double calculProbaPrise(int f, double k){
         return Math.pow((k/(k+f)),2);
     }
 
