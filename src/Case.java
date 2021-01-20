@@ -55,7 +55,7 @@ public class Case {
     public boolean containObjetB(){
         boolean contain = false;
         for(int i=0;i<this.entiteList.size();i++){
-            if(this.entiteList.get(i).getClass().equals("B")){
+            if(this.entiteList.get(i).getType().equals("B")){
                 contain = true;
             }
         }

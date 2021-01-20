@@ -33,7 +33,7 @@ public class Tri_Collectif {
     public void GenerationAleatoireAgent(){
         int rand1,rand2;
         for(int i=0;i<this.nbAgent;i++){
-            Agent a = new Agent(this.Deplacement, 10);
+            Agent a = new Agent(this.Deplacement, 10,0.1);
             a.manageMemory("0");
             do {
                 rand1 = (int)(Math.random() * this.taille1);
@@ -74,7 +74,11 @@ public class Tri_Collectif {
             for(int j=0;j<this.taille2;j++){
                 System.out.print("[");
                 for(int k=0;k<this.Grille[i][j].getEntiteList().size();k++){
-                    System.out.print(this.Grille[i][j].getEntiteList().get(k).getType());
+                    if(this.Grille[i][j].getEntiteList().get(k).getType().equals("0")){
+                        System.out.print(" ");
+                    }else {
+                        System.out.print(this.Grille[i][j].getEntiteList().get(k).getType());
+                    }
                 }
                 System.out.print("]");
             }
@@ -102,28 +106,6 @@ public class Tri_Collectif {
         }
     }
 
-    public void possiblePrise(Agent a, Case c){
-        double randomNumber = Math.random();
-        if(randomNumber>a.getProbaPrise()){
-            a.setHaveObject(true);
-            for(int i=0;i<c.getEntiteList().size();i++){
-                if(c.getEntiteList().get(i).getClass() == Objet.class){
-                    a.setObjet((Objet) c.getEntiteList().get(i));
-                    c.getEntiteList().remove(i);
-                }
-            }
-        }
-    }
-
-    public void possibleDepot(Agent a, Case c){
-        double randomNumber = Math.random();
-        if(randomNumber>a.getProbaDepot()){
-            a.setHaveObject(false);
-            c.getEntiteList().add(a.getObjet());
-            a.setObjet(null);
-        }
-    }
-
     public void DeplacementAgent(){
         Random rand = new Random();
         boolean estDep = false;
@@ -139,12 +121,20 @@ public class Tri_Collectif {
                                 map.getKey().manageMemory(this.Grille[map.getValue().getX()][map.getValue().getY() - 1].getEntiteList().get(0).getType());
                                 map.getValue().setY(map.getValue().getY() - 1);
                                 removeAgentFromCase(this.Grille[map.getValue().getX()][map.getValue().getY() + 1]);
-                                calculAndSetProba(map.getKey(), Math.max(nbObjetAAdjacent(map.getValue().getX(), map.getValue().getY()), nbObjetBAdjacent(map.getValue().getX(), map.getValue().getY())), this.k, this.k2);
+                                if(map.getKey().getHaveObject()){
+                                    if(map.getKey().getObjet().getType().equals("A")){
+                                        map.getKey().calculAndSetProba(nbObjetAAdjacent(map.getValue().getX(), map.getValue().getY()) , this.k, this.k2);
+                                        //map.getKey().calculAndSetProbaWithError(this.k, this.k2,"A");
+                                    }else if(map.getKey().getObjet().getType().equals("B")){
+                                        map.getKey().calculAndSetProba(nbObjetBAdjacent(map.getValue().getX(), map.getValue().getY()), this.k, this.k2);
+                                        //map.getKey().calculAndSetProbaWithError(this.k, this.k2,"B");
+                                    }
+                                }
                                 addAgentToCase(this.Grille[map.getValue().getX()][map.getValue().getY()],map.getKey());
                                 if(this.Grille[map.getValue().getX()][map.getValue().getY()].containObjet() && !map.getKey().getHaveObject()){
-                                    possiblePrise(map.getKey(),this.Grille[map.getValue().getX()][map.getValue().getY()]);
+                                    map.getKey().possiblePrise(this.Grille[map.getValue().getX()][map.getValue().getY()]);
                                 }else if(!this.Grille[map.getValue().getX()][map.getValue().getY()].containObjet() && map.getKey().getHaveObject()){
-                                    possibleDepot(map.getKey(),this.Grille[map.getValue().getX()][map.getValue().getY()]);
+                                    map.getKey().possibleDepot(this.Grille[map.getValue().getX()][map.getValue().getY()]);
                                 }
                                 if(this.Grille[map.getValue().getX()][map.getValue().getY() + 1].getEntiteList().size()==0){
                                     this.Grille[map.getValue().getX()][map.getValue().getY() + 1].getEntiteList().add(new EntiteVide());
@@ -159,12 +149,20 @@ public class Tri_Collectif {
                                 map.getKey().manageMemory(this.Grille[map.getValue().getX()][map.getValue().getY() + 1].getEntiteList().get(0).getType());
                                 map.getValue().setY(map.getValue().getY() + 1);
                                 removeAgentFromCase(this.Grille[map.getValue().getX()][map.getValue().getY() - 1]);
-                                calculAndSetProba(map.getKey(), Math.max(nbObjetAAdjacent(map.getValue().getX(), map.getValue().getY()), nbObjetBAdjacent(map.getValue().getX(), map.getValue().getY())), this.k, this.k2);
+                                if(map.getKey().getHaveObject()){
+                                    if(map.getKey().getObjet().getType().equals("A")){
+                                        map.getKey().calculAndSetProba(nbObjetAAdjacent(map.getValue().getX(), map.getValue().getY()) , this.k, this.k2);
+                                        //map.getKey().calculAndSetProbaWithError(this.k, this.k2,"A");
+                                    }else if(map.getKey().getObjet().getType().equals("B")){
+                                        map.getKey().calculAndSetProba(nbObjetBAdjacent(map.getValue().getX(), map.getValue().getY()), this.k, this.k2);
+                                        //map.getKey().calculAndSetProbaWithError(this.k, this.k2,"B");
+                                    }
+                                }
                                 addAgentToCase(this.Grille[map.getValue().getX()][map.getValue().getY()],map.getKey());
                                 if(this.Grille[map.getValue().getX()][map.getValue().getY()].containObjet() && !map.getKey().getHaveObject()){
-                                    possiblePrise(map.getKey(),this.Grille[map.getValue().getX()][map.getValue().getY()]);
+                                    map.getKey().possiblePrise(this.Grille[map.getValue().getX()][map.getValue().getY()]);
                                 }else if(!this.Grille[map.getValue().getX()][map.getValue().getY()].containObjet() && map.getKey().getHaveObject()){
-                                    possibleDepot(map.getKey(),this.Grille[map.getValue().getX()][map.getValue().getY()]);
+                                    map.getKey().possibleDepot(this.Grille[map.getValue().getX()][map.getValue().getY()]);
                                 }
                                 if(this.Grille[map.getValue().getX()][map.getValue().getY() - 1].getEntiteList().size()==0){
                                     this.Grille[map.getValue().getX()][map.getValue().getY() - 1].getEntiteList().add(new EntiteVide());
@@ -179,12 +177,20 @@ public class Tri_Collectif {
                                 map.getKey().manageMemory(this.Grille[map.getValue().getX() + 1][map.getValue().getY()].getEntiteList().get(0).getType());
                                 map.getValue().setX(map.getValue().getX() + 1);
                                 removeAgentFromCase(this.Grille[map.getValue().getX()-1][map.getValue().getY()]);
-                                calculAndSetProba(map.getKey(), Math.max(nbObjetAAdjacent(map.getValue().getX(), map.getValue().getY()), nbObjetBAdjacent(map.getValue().getX(), map.getValue().getY())), this.k, this.k2);
+                                if(map.getKey().getHaveObject()){
+                                    if(map.getKey().getObjet().getType().equals("A")){
+                                        map.getKey().calculAndSetProba(nbObjetAAdjacent(map.getValue().getX(), map.getValue().getY()) , this.k, this.k2);
+                                        //map.getKey().calculAndSetProbaWithError(this.k, this.k2,"A");
+                                    }else if(map.getKey().getObjet().getType().equals("B")){
+                                        map.getKey().calculAndSetProba(nbObjetBAdjacent(map.getValue().getX(), map.getValue().getY()), this.k, this.k2);
+                                        //map.getKey().calculAndSetProbaWithError(this.k, this.k2,"B");
+                                    }
+                                }
                                 addAgentToCase(this.Grille[map.getValue().getX()][map.getValue().getY()],map.getKey());
                                 if(this.Grille[map.getValue().getX()][map.getValue().getY()].containObjet() && !map.getKey().getHaveObject()){
-                                    possiblePrise(map.getKey(),this.Grille[map.getValue().getX()][map.getValue().getY()]);
+                                    map.getKey().possiblePrise(this.Grille[map.getValue().getX()][map.getValue().getY()]);
                                 }else if(!this.Grille[map.getValue().getX()][map.getValue().getY()].containObjet() && map.getKey().getHaveObject()){
-                                    possibleDepot(map.getKey(),this.Grille[map.getValue().getX()][map.getValue().getY()]);
+                                    map.getKey().possibleDepot(this.Grille[map.getValue().getX()][map.getValue().getY()]);
                                 }
                                 if(this.Grille[map.getValue().getX()-1][map.getValue().getY()].getEntiteList().size()==0){
                                     this.Grille[map.getValue().getX()-1][map.getValue().getY()].getEntiteList().add(new EntiteVide());
@@ -199,12 +205,20 @@ public class Tri_Collectif {
                                 map.getKey().manageMemory(this.Grille[map.getValue().getX() - 1][map.getValue().getY()].getEntiteList().get(0).getType());
                                 map.getValue().setX(map.getValue().getX() - 1);
                                 removeAgentFromCase(this.Grille[map.getValue().getX()+1][map.getValue().getY()]);
-                                calculAndSetProba(map.getKey(), Math.max(nbObjetAAdjacent(map.getValue().getX(), map.getValue().getY()), nbObjetBAdjacent(map.getValue().getX(), map.getValue().getY())), this.k, this.k2);
+                                if(map.getKey().getHaveObject()){
+                                    if(map.getKey().getObjet().getType().equals("A")){
+                                        map.getKey().calculAndSetProba(nbObjetAAdjacent(map.getValue().getX(), map.getValue().getY()) , this.k, this.k2);
+                                        //map.getKey().calculAndSetProbaWithError(this.k, this.k2,"A");
+                                    }else if(map.getKey().getObjet().getType().equals("B")){
+                                        map.getKey().calculAndSetProba(nbObjetBAdjacent(map.getValue().getX(), map.getValue().getY()), this.k, this.k2);
+                                        //map.getKey().calculAndSetProbaWithError(this.k, this.k2,"B");
+                                    }
+                                }
                                 addAgentToCase(this.Grille[map.getValue().getX()][map.getValue().getY()],map.getKey());
                                 if(this.Grille[map.getValue().getX()][map.getValue().getY()].containObjet() && !map.getKey().getHaveObject()){
-                                    possiblePrise(map.getKey(),this.Grille[map.getValue().getX()][map.getValue().getY()]);
+                                    map.getKey().possiblePrise(this.Grille[map.getValue().getX()][map.getValue().getY()]);
                                 }else if(!this.Grille[map.getValue().getX()][map.getValue().getY()].containObjet() && map.getKey().getHaveObject()){
-                                    possibleDepot(map.getKey(),this.Grille[map.getValue().getX()][map.getValue().getY()]);
+                                    map.getKey().possibleDepot(this.Grille[map.getValue().getX()][map.getValue().getY()]);
                                 }
                                 if(this.Grille[map.getValue().getX()+1][map.getValue().getY()].getEntiteList().size()==0){
                                     this.Grille[map.getValue().getX()+1][map.getValue().getY()].getEntiteList().add(new EntiteVide());
@@ -261,39 +275,25 @@ public class Tri_Collectif {
     public int nbObjetBAdjacent(int x,int y){
         int compt = 0;
         if(x+1<this.taille1) {
-            if (Grille[x + 1][y].containObjetB()) {
+            if (Grille[x+1][y].containObjetB()) {
                 compt++;
             }
         }
         if(x-1>=0) {
-            if (Grille[x - 1][y].containObjetB()) {
+            if (Grille[x-1][y].containObjetB()) {
                 compt++;
             }
         }
         if(y+1<this.taille2) {
-            if (Grille[x][y + 1].containObjetB()) {
+            if (Grille[x][y+1].containObjetB()) {
                 compt++;
             }
         }
         if(y-1>=0) {
-            if (Grille[x][y - 1].containObjetB()) {
+            if (Grille[x][y-1].containObjetB()) {
                 compt++;
             }
         }
         return compt;
-    }
-
-    /**
-     *
-     * @param a
-     * @param nb
-     * @param k1
-     * @param k2
-     */
-    public void calculAndSetProba(Agent a, int nb, double k1, double k2){
-        double probaPrise = a.calculProbaPrise(nb,k1);
-        double probaDepot = a.calculProbaDepot(nb,k2);
-        a.setProbaDepot(probaDepot);
-        a.setProbaPrise(probaPrise);
     }
 }

@@ -1,10 +1,8 @@
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 public class Agent extends Entite{
     private int taille;
+    private double e;
     private Queue<String> Memoire;
     private int i;
     private Objet objet;
@@ -12,14 +10,23 @@ public class Agent extends Entite{
     private double probaDepot;
     private double probaPrise;
 
-    public Agent(int deplacement, int taille){
+    public Agent(int deplacement, int taille, double error){
        this.Memoire = new LinkedList<>();
        this.i = deplacement;
        this.haveObject = false;
+       this.e = error;
     }
 
     public String getType(){
         return "X";
+    }
+
+    public double getE() {
+        return e;
+    }
+
+    public void setE(double e) {
+        this.e = e;
     }
 
     public boolean getHaveObject() {
@@ -88,11 +95,11 @@ public class Agent extends Entite{
         this.probaPrise = probaPrise;
     }
 
-    public double calculProbaDepot(int f, double k){
+    public double calculProbaDepot(double f, double k){
         return Math.pow((f/(k+f)),2);
     }
 
-    public double calculProbaPrise(int f, double k){
+    public double calculProbaPrise(double f, double k){
         return Math.pow((k/(k+f)),2);
     }
 
@@ -101,5 +108,76 @@ public class Agent extends Entite{
         if(this.Memoire.size()>this.taille){
             this.Memoire.remove();
         }
+    }
+
+    public void calculAndSetProba(int nb, double k1, double k2){
+        double probaP = this.calculProbaPrise(nb,k1);
+        double probaD = this.calculProbaDepot(nb,k2);
+        this.probaDepot = probaD;
+        this.probaPrise = probaP;
+    }
+
+    public void calculAndSetProbaWithError(double k1, double k2, String obj){
+        if(this.objet.getType().equals("A") || obj.equals("A")){
+            double probaP = this.calculProbaPrise(this.defineFA(),k1);
+            double probaD = this.calculProbaDepot(this.defineFA(),k2);
+            this.probaDepot = probaD;
+            this.probaPrise = probaP;
+        }else {
+            double probaP = this.calculProbaPrise(this.defineFB(), k1);
+            double probaD = this.calculProbaDepot(this.defineFB(), k2);
+            this.probaDepot = probaD;
+            this.probaPrise = probaP;
+        }
+    }
+
+    public void possibleDepot(Case c){
+        double randomNumber = Math.random();
+        if(randomNumber<this.probaDepot){
+            this.haveObject = false;
+            c.getEntiteList().add(this.objet);
+            this.objet = null;
+        }
+    }
+
+    public void possiblePrise(Case c){
+        double randomNumber = Math.random();
+        if(randomNumber>this.probaPrise){
+           this.haveObject = true;
+            for(int i=0;i<c.getEntiteList().size();i++){
+                if(c.getEntiteList().get(i).getClass() == Objet.class){
+                    this.objet = ((Objet) c.getEntiteList().get(i));
+                    c.getEntiteList().remove(i);
+                }
+            }
+        }
+    }
+
+    public double defineFA(){
+        int comptA=0;
+        int comptB=0;
+        Iterator it = this.Memoire.iterator();
+        while(it.hasNext()){
+            if(it.next().equals("A")){
+                comptA++;
+            }else if(it.next().equals("B")){
+                comptB++;
+            }
+        }
+        return ((comptA + this.e*comptB) / this.Memoire.size());
+    }
+
+    public double defineFB(){
+        int comptA=0;
+        int comptB=0;
+        Iterator it = this.Memoire.iterator();
+        while(it.hasNext()){
+            if(it.next().equals("A")){
+                comptA++;
+            }else if(it.next().equals("B")){
+                comptB++;
+            }
+        }
+        return ((this.e*comptA + comptB) / this.Memoire.size());
     }
 }
